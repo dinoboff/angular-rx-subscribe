@@ -50,7 +50,7 @@ describe('rxSubscribe', function() {
       ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
 
       expect(scope.$applyAsync).to.have.been.calledTwice;
-      expect(scope.$rx).to.eql({next: 2, prev: 1});
+      expect(scope.$rx).to.eql({next: 2});
     });
 
     it('should update the scope with the complete notifications', function() {
@@ -58,7 +58,7 @@ describe('rxSubscribe', function() {
       ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
 
       expect(scope.$applyAsync).to.have.been.calledTwice;
-      expect(scope.$rx).to.eql({next: 1, prev: 1, complete: true});
+      expect(scope.$rx).to.eql({next: 1, last: 1, complete: true});
     });
 
     it('should update the scope with the error notifications', function() {
@@ -68,7 +68,7 @@ describe('rxSubscribe', function() {
       ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
 
       expect(scope.$applyAsync).to.have.been.calledTwice;
-      expect(scope.$rx).to.eql({prev: 1, error: e});
+      expect(scope.$rx).to.eql({last: 1, error: e});
     });
 
     it('should unsubscribe subscription on destroyed', function() {

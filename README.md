@@ -52,7 +52,8 @@ notification in the child scope. The value ("$rx" by default, configurable via
 the "as" attribute) will have a "next", "prev", "complete" and "error":
 
 - "next" holds the value of current "next" notification.
-- "prev" holds the value of the previous "next" notication.
+- "last" holds the value of the previous "next" notication after a "complete"
+or and "error" notification.
 - "complete" holds `true` if the Observable is completed (it doesn't reset
 "next").
 - "error" holds the error if the Observable throws an error (it does reset

@@ -71,10 +71,13 @@ export class RxSubscribeCtrl {
         return;
       }
 
-      const prev = scope[this.label] && scope[this.label].next;
+      const last = scope[this.label] && scope[this.label].next;
 
       fn(scope);
-      scope[this.label].prev = prev;
+
+      if (scope[this.label].complete || scope[this.label].hasOwnProperty('error')) {
+        scope[this.label].last = last;
+      }
     });
   }
 
