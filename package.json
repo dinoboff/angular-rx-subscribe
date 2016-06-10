@@ -1,0 +1,67 @@
+{
+  "name": "angular-rx-subscribe",
+  "version": "0.0.0",
+  "description": "AngularJS 1.5+ directive to access observable notifications.",
+  "main": "src/index.js",
+  "scripts": {
+    "clean": "rm -rf lib/ _test/ coverage/",
+    "build": "./tools/bin/build.sh",
+    "cover": "./tools/bin/cover.sh",
+    "lint": "eslint src/ --fix",
+    "lint-no-fix": "eslint src/",
+    "postinstall": "jspm install",
+    "start": "python -m SimpleHTTPServer 8000",
+    "start:build": "cd dist/ && python -m SimpleHTTPServer 8000",
+    "test": "./tools/bin/test.sh",
+    "version": "cd tools/assets/dist && npm version --no-git-tag-version \"$npm_package_version\" && git add package.json"
+  },
+  "keywords": ["Observable", "RxJS", "Angular"],
+  "author": "Damien Lebrun",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^6.0.4",
+    "eslint": "^2.11.1",
+    "eslint-config-xo": "^0.14.1",
+    "eslint-plugin-babel": "^3.2.0",
+    "istanbul": "^0.4.3",
+    "jspm": "^0.17.0-beta.17",
+    "mocha": "^2.5.3",
+    "remap-istanbul": "^0.6.4",
+    "source-map-support": "^0.4.0"
+  },
+  "jspm": {
+    "name": "angular-rx-subscribe",
+    "main": "index.js",
+    "dependencies": {
+      "angular": "github:angular/bower-angular@^1.5.6",
+      "rxjs": "npm:rxjs@5.0.0-beta.8",
+      "sinon-chai": "npm:sinon-chai@^2.8.0"
+    },
+    "devDependencies": {
+      "plugin-babel": "npm:systemjs-plugin-babel@^0.0.12"
+    },
+    "peerDependencies": {
+      "buffer": "github:jspm/nodelibs-buffer@^0.2.0-alpha",
+      "chai": "npm:chai@^3.5.0",
+      "process": "github:jspm/nodelibs-process@^0.2.0-alpha",
+      "sinon": "npm:sinon@^1.4.0",
+      "util": "github:jspm/nodelibs-util@^0.2.0-alpha"
+    },
+    "overrides": {
+      "github:angular/bower-angular@1.5.6": {
+        "main": "angular",
+        "meta": {
+          "angular.js": {
+            "exports": "angular",
+            "format": "global"
+          }
+        }
+      },
+      "npm:inherits@2.0.1": {
+        "ignore": [
+          "test.js"
+        ]
+      }
+    }
+  }
+}

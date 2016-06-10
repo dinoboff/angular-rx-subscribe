@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+    
+    <app></app>
+
+    <script src="jspm_packages/system.js"></script>
+    <script src="jspm.config.js"></script>
+
+		<script>
+      System.import(
+        './index.js'
+      ).catch(
+        console.error.bind(console)
+      );
+		</script>
+  
+  </body>
+</html>

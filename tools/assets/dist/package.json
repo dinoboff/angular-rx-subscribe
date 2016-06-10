@@ -1,0 +1,19 @@
+{
+  "name": "angular-rx-subscribe",
+  "version": "0.0.0",
+  "description": "AngularJS 1.5+ directive to access observable notifications.",
+  "main": "angular-rx-subscribe.js",
+  "registry": "npm",
+  "peerDependencies": {
+    "angular": "^1.5.6"
+  },
+  "jspmPackage": true,
+  "format": "amd",
+  "keywords": [
+    "Observable",
+    "RxJS",
+    "Angular"
+  ],
+  "author": "Damien Lebrun",
+  "license": "MIT"
+}
