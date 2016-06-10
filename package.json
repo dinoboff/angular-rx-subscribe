@@ -10,10 +10,11 @@
     "lint": "eslint src/ --fix",
     "lint-no-fix": "eslint src/",
     "postinstall": "jspm install",
+    "release": "./tools/bin/release.sh",
     "start": "python -m SimpleHTTPServer 8000",
     "start:build": "cd dist/ && python -m SimpleHTTPServer 8000",
     "test": "./tools/bin/test.sh",
-    "version": "cd tools/assets/dist && npm version --no-git-tag-version \"$npm_package_version\" && git add package.json"
+    "version": "./tools/bin/version.sh"
   },
   "keywords": ["Observable", "RxJS", "Angular"],
   "author": "Damien Lebrun",
