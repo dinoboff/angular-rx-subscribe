@@ -1,6 +1,6 @@
 {
   "name": "angular-rx-subscribe",
-  "version": "0.1.0-0",
+  "version": "0.0.0",
   "description": "AngularJS 1.5+ directive to access observable notifications.",
   "main": "angular-rx-subscribe.js",
   "registry": "npm",

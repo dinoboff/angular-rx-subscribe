@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 #
-# !!! Assumed to be run via a npm run command !!!
-# 
 set -e
+
+if [[ -z "$1" ]]; then
+	echo "The release type (major, minor, patch...) is missing."
+	exit 1
+fi
 
 npm run lint-no-fix
 npm run test
 npm run build
-NEW_VERSION=`npm version ${1:-preminor}`
+NEW_VERSION=`npm version "$1"`
 
 cd dist/
 npm publish
