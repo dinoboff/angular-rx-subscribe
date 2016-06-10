@@ -6,9 +6,11 @@
 
 import angular from 'angular';
 import Rx from 'rxjs/bundles/Rx.umd.js';
-import {module} from 'src/index.js';
+import {module, extend} from 'src/index.js';
 
 const app = angular.module('exampleApp', [module.name]);
+
+app.run(['$rootScope', $rootScope => extend(Rx.Observable, $rootScope)]);
 
 app.component('app', {
   template: `
@@ -52,11 +54,22 @@ app.component('app', {
       <p ng-if="$rx.error">{{$rx.error.toString()}}</p>
     </rx-subscribe>
 
+    <h2>Unpacked</h2>
+
+    <p>Time: {{$ctrl.unpackedTime|date:'mediumTime'}}</p>
+
   `,
   controller: function AppController() {
-    this.time = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
-    this.timeBefore = Rx.Observable.interval(1000).startWith(0).map(() => new Date(Date.now() - 5000));
-    this.timeLimited = Rx.Observable.interval(1000).startWith(0).map(() => new Date()).take(3);
+    const src = Rx.Observable.interval(1000).startWith(0);
+    const sub = src.$subscribe(() => {
+      this.unpackedTime = new Date();
+    });
+
+    this.$onDestroy = () => sub.unsubscribe();
+
+    this.time = src.map(() => new Date());
+    this.timeBefore = src.startWith(0).map(() => new Date(Date.now() - 5000));
+    this.timeLimited = src.startWith(0).map(() => new Date()).take(3);
     this.timeError = Rx.Observable.concat(this.timeLimited, Rx.Observable.throw(new Error('Err... Lost it.')));
   }
 });

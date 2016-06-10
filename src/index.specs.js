@@ -4,6 +4,7 @@ import sinonChai from 'sinon-chai';
 import Rx from 'rxjs/bundles/Rx.umd.js';
 
 import {RxSubscribeCtrl} from './directive.js';
+import {extend} from './operators.js';
 
 const expect = chai.expect;
 
@@ -126,6 +127,136 @@ describe('rxSubscribe', function() {
       expect(ctrl.src.subscribe).to.have.been.calledOnce;
     });
 
+  });
+
+});
+
+describe('extend', function() {
+  let Observable, defaultScope;
+
+  beforeEach(function() {
+    defaultScope = {
+      $applyAsync: sinon.stub()
+    };
+
+    Observable = function() {};
+    Observable.prototype.subscribe = sinon.stub();
+
+    extend(Observable, defaultScope);
+  });
+
+  it('should set $subscribe', function() {
+    expect(Observable.prototype.$subscribe).to.be.a('function');
+  });
+
+  it('should set $defaultScope', function() {
+    expect(Observable.prototype.$defaultScope).to.equal(defaultScope);
+  });
+
+  describe('$subscribe', function() {
+    let src, scope;
+
+    beforeEach(function() {
+      scope = {
+        $applyAsync: sinon.stub()
+      };
+      src = new Observable();
+    });
+
+    it('should subscribe to observable', function() {
+      const subscription = {};
+
+      src.subscribe.withArgs(sinon.match({
+        next: sinon.match.func,
+        error: sinon.match.func,
+        complete: sinon.match.func
+      })).returns(subscription);
+
+      expect(src.$subscribe({}, scope)).to.equal(subscription);
+      expect(src.subscribe).to.have.been.calledOnce;
+    });
+
+    it(`should wrap observer function`, function() {
+      const handler = sinon.spy();
+      const v = {};
+
+      src.$subscribe(handler, scope);
+
+      const observer = src.subscribe.lastCall.args[0];
+
+      observer.next(v);
+      expect(scope.$applyAsync).to.have.been.calledOnce;
+      expect(scope.$applyAsync).to.have.been.calledWithExactly(sinon.match.func);
+
+      expect(handler).to.not.have.been.called;
+      scope.$applyAsync.lastCall.args[0]();
+      expect(handler).to.have.been.calledOnce;
+      expect(handler).to.have.been.calledWithExactly(v);
+    });
+
+    ['next', 'error', 'complete'].forEach(function(name) {
+
+      it(`should wrap ${name} handler`, function() {
+        const handler = sinon.spy();
+        const v = {};
+
+        src.$subscribe({[name]: handler}, scope);
+
+        const observer = src.subscribe.lastCall.args[0];
+
+        observer[name](v);
+        expect(scope.$applyAsync).to.have.been.calledOnce;
+        expect(scope.$applyAsync).to.have.been.calledWithExactly(sinon.match.func);
+
+        expect(handler).to.not.have.been.called;
+        scope.$applyAsync.lastCall.args[0]();
+        expect(handler).to.have.been.calledOnce;
+        expect(handler).to.have.been.calledWithExactly(v);
+      });
+
+      it(`should wrap ${name} handler`, function() {
+        const handler = sinon.spy();
+        const v = {};
+
+        src.$subscribe({[name]: handler});
+
+        const observer = src.subscribe.lastCall.args[0];
+
+        observer[name](v);
+        expect(defaultScope.$applyAsync).to.have.been.calledOnce;
+        expect(defaultScope.$applyAsync).to.have.been.calledWithExactly(sinon.match.func);
+
+        expect(handler).to.not.have.been.called;
+        defaultScope.$applyAsync.lastCall.args[0]();
+        expect(handler).to.have.been.calledOnce;
+        expect(handler).to.have.been.calledWithExactly(v);
+      });
+
+      it(`should wrap missing ${name} handler`, function() {
+        const v = {};
+
+        src.$subscribe({}, scope);
+
+        const observer = src.subscribe.lastCall.args[0];
+
+        observer[name](v);
+        expect(scope.$applyAsync).to.have.been.calledOnce;
+        expect(scope.$applyAsync).to.have.been.calledWithExactly();
+      });
+
+      it(`should wrap missing ${name} handler around defaultScope`, function() {
+        const v = {};
+
+        src.$subscribe({});
+
+        const observer = src.subscribe.lastCall.args[0];
+
+        observer[name](v);
+        expect(defaultScope.$applyAsync).to.have.been.calledOnce;
+        expect(defaultScope.$applyAsync).to.have.been.calledWithExactly();
+      });
+
+    });
   });
 
 });

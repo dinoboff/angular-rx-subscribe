@@ -18,6 +18,35 @@ jspm install npm:angular-rx-subscribe
 
 ## Usage
 
+### Observable extension
+
+Add a `$subscribe(observer, [scope])` to an Observable prototype:
+```js
+const app = angular.module('exampleApp', []);
+
+app.run([
+  '$rootScope',
+  $rootScope => ngRxSubscribe.extend(Rx.Observable, $rootScope)
+]);
+
+app.component('app', {
+  template: `
+    <h1>Example</h1>
+    <p>Time: {{$ctrl.unpackedTime|date:\'mediumTime\'}}</p>
+  `,
+  controller: function AppController() {
+    const src = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
+    const subscription = src.$subscribe(time => {
+      this.unpackedTime = time;
+    });
+
+    this.$onDestroy = () => subscription.unsubscribe();
+  }
+});
+```
+
+### `rx-subscribe` directive
+
 The rx-subscribe directive take an - ES Stage1 - Observable and inject its
 notification in the child scope. The value ("$rx" by default, configurable via
 the "as" attribute) will have a "next", "prev", "complete" and "error":
@@ -30,40 +59,19 @@ the "as" attribute) will have a "next", "prev", "complete" and "error":
 "next")
 
 Example:
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Example</title>
-  </head>
-  <body>
+```js
+const app = angular.module('exampleApp', ['rxSubscribe']);
 
-    <app></app>
+app.component('app', {
+  template: `
+    <h1>Example</h1>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
-    <script src="//npmcdn.com/@reactivex/rxjs@5.0.0-beta.8/dist/global/Rx.umd.min.js"></script>
-    <script src="./node_modules/angular-rx-subscribe/angular-rx-subscribe.js"></script>
-
-    <script>
-      var app = angular.module('exampleApp', ['rxSubscribe']);
-
-      app.component('app', {
-        template: `
-          <h1>Example</h1>
-
-          <rx-subscribe src="$ctrl.time" as="$rx">
-            <p>Time: {{$rx.next|date:\'mediumTime\'}}</p>
-          </rx-subscribe>
-        `,
-        controller: function AppController() {
-          this.time = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
-        }
-      });
-
-      angular.element(document).ready(function() {
-        angular.bootstrap(document, [app.name], {strictDi: true});
-      });
-    </script>
-  </body>
-</html>
+    <rx-subscribe src="$ctrl.time" as="$rx">
+      <p>Time: {{$rx.next|date:\'mediumTime\'}}</p>
+    </rx-subscribe>
+  `,
+  controller: function AppController() {
+    this.time = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
+  }
+});
 ```
