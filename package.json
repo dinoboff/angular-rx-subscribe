@@ -1,6 +1,6 @@
 {
   "name": "angular-rx-subscribe",
-  "version": "0.0.0",
+  "version": "0.1.0-0",
   "description": "AngularJS 1.5+ directive to access observable notifications.",
   "main": "src/index.js",
   "scripts": {
@@ -16,7 +16,11 @@
     "test": "./tools/bin/test.sh",
     "version": "./tools/bin/version.sh"
   },
-  "keywords": ["Observable", "RxJS", "Angular"],
+  "keywords": [
+    "Observable",
+    "RxJS",
+    "Angular"
+  ],
   "author": "Damien Lebrun",
   "license": "MIT",
   "devDependencies": {
