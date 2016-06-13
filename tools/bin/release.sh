@@ -10,14 +10,10 @@ fi
 npm run lint-no-fix
 npm run test
 npm run build
-NEW_VERSION=`npm version "$1" | cut -d ' ' -f1`
+NEW_VERSION=`npm version --no-git-tag-version patch | cut -d ' ' -f1 | head -1`
 
 cd dist/
 npm publish
 cd ..
 
-echo "Pushing master..."
-git push "git@github.com:dinoboff/angular-rx-subscribe.git" master
-
-echo "Pushing ""${NEW_VERSION}""..."
-git push "git@github.com:dinoboff/angular-rx-subscribe.git" "$NEW_VERSION"
+git push "git@github.com:dinoboff/angular-rx-subscribe.git" master "$NEW_VERSION"
