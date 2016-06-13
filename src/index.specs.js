@@ -62,9 +62,12 @@ describe('rxSubscribe', function() {
       scope.$watch.yields(src);
 
       ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      expect(scope.$rx).to.eql({});
+      expect(scope.$applyAsync).to.have.been.calledOnce;
       src.next('foo');
 
       expect(scope.$rx.next).to.equal('foo');
+      expect(scope.$applyAsync).to.have.been.calledTwice;
     });
 
     it('should update the scope with complete notification', function() {
@@ -80,6 +83,7 @@ describe('rxSubscribe', function() {
       expect(scope.$rx.next).to.equal('foo');
       expect(scope.$rx.last).to.equal('foo');
       expect(scope.$rx.complete).to.equal(true);
+      expect(scope.$applyAsync).to.have.been.calledThrice;
     });
 
     it('should update the scope with error notification', function() {
@@ -96,6 +100,7 @@ describe('rxSubscribe', function() {
       expect(scope.$rx.next).to.equal(undefined);
       expect(scope.$rx.last).to.equal('foo');
       expect(scope.$rx.error).to.equal(err);
+      expect(scope.$applyAsync).to.have.been.calledThrice;
     });
 
     it('should listen for scope destroy event', function() {

@@ -45,8 +45,9 @@ export class RxSubscribeCtrl {
   unsubscribe() {
     if (this.subscription) {
       this.subscription.unsubscribe();
-      this.set({});
     }
+
+    this.set({});
   }
 
   set(obj) {
