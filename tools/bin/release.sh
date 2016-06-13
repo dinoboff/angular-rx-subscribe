@@ -16,4 +16,8 @@ cd dist/
 npm publish
 cd ..
 
-git push "git@github.com:dinoboff/angular-rx-subscribe.git" master "$NEW_VERSION"
+echo "Pushing master..."
+git push "git@github.com:dinoboff/angular-rx-subscribe.git" master
+
+echo "Pushing ""${NEW_VERSION}""..."
+git push "git@github.com:dinoboff/angular-rx-subscribe.git" "$NEW_VERSION"
