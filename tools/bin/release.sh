@@ -12,7 +12,9 @@ npm run test
 npm run build
 NEW_VERSION=`npm version "$1" | cut -d ' ' -f1`
 
-cd dist/
-npm publish
+# cd dist/
+# npm publish
+# cd ..
 
+echo "git push git@github.com:dinoboff/angular-rx-subscribe.git master ${NEW_VERSION}"
 git push git@github.com:dinoboff/angular-rx-subscribe.git master $NEW_VERSION
