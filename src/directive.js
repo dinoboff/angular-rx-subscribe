@@ -4,44 +4,42 @@
 
 export class RxSubscribeCtrl {
 
-  constructor($log, $element, $transclude) {
+  constructor($log, $scope, $attrs) {
     this.$log = $log;
-    this.$transScope = null;
+    this.$scope = $scope;
+    this.label = $attrs.rxAs || '$rx';
+
     this.subscription = null;
 
-    $transclude((clone, scope) => {
-      $element.append(clone);
-      this.$transScope = scope;
-    });
+    $scope.$watch(
+      $attrs.rxSubscribe,
+      src => this.subscribe(src)
+    );
+
+    $scope.$on('$destroy', () => this.close());
   }
 
-  $onChanges(changes) {
-    if (!changes.src) {
-      return;
-    }
-
-    this.label = this.label || '$rx';
+  close() {
     this.unsubscribe();
 
-    if (!this.src || !this.src.subscribe) {
+    this.$log = null;
+    this.$scope = null;
+    this.subscription = null;
+  }
+
+  subscribe(src) {
+    this.unsubscribe();
+
+    if (!src || !src.subscribe) {
       this.$log.error(new Error('rxSubscribe.src should be an observable'));
       return;
     }
 
-    this.subscription = this.src.subscribe({
+    this.subscription = src.subscribe({
       next: next => this.set({next}),
       error: error => this.set({error}),
       complete: () => this.update({complete: true})
     });
-  }
-
-  $onDestroy() {
-    this.unsubscribe();
-    this.$transScope.$destroy();
-
-    this.$log = null;
-    this.$transScope = null;
-    this.subscription = null;
   }
 
   unsubscribe() {
@@ -62,12 +60,12 @@ export class RxSubscribeCtrl {
   }
 
   apply(fn) {
-    if (!this || !this.$transScope || !this.$transScope.$applyAsync) {
+    if (!this || !this.$scope) {
       return;
     }
 
-    this.$transScope.$applyAsync(scope => {
-      if (!scope || !this || !this.label) {
+    this.$scope.$applyAsync(scope => {
+      if (!scope || !this) {
         return;
       }
 
@@ -83,19 +81,13 @@ export class RxSubscribeCtrl {
 
 }
 
-RxSubscribeCtrl.$inject = ['$log', '$element', '$transclude'];
+RxSubscribeCtrl.$inject = ['$log', '$scope', '$attrs'];
 
 export function rxSubscribeDirective() {
   return {
-    restrict: 'EA',
-    transclude: true,
+    restrict: 'A',
     controller: RxSubscribeCtrl,
-    controllerAs: '$ctrl',
-    scope: {
-      src: '<',
-      label: '@?as'
-    },
-    bindToController: true
+    scope: true
   };
 }
 

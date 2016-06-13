@@ -13,118 +13,120 @@ chai.use(sinonChai);
 describe('rxSubscribe', function() {
 
   describe('controller', function() {
-    let ctrl, log, element, transclude, clone, scope;
+    let ctrl, log, scope, attrs;
 
     beforeEach(function() {
       log = {};
-      element = {
-        append: sinon.spy()
-      };
-      clone = {};
       scope = {
         $applyAsync: sinon.stub(),
-        $destroy: sinon.spy()
+        $on: sinon.spy(),
+        $watch: sinon.stub(),
+        $eval: sinon.stub()
       };
       scope.$applyAsync.yields(scope);
-      transclude = sinon.stub().withArgs(sinon.match.func).yields(clone, scope);
-
-      ctrl = new RxSubscribeCtrl(log, element, transclude);
+      attrs = {rxSubscribe: '$ctrl.src'};
     });
 
-    it('should transclude', function() {
-      expect(transclude).to.have.been.calledOnce;
-      expect(transclude).to.have.been.calledWithExactly(sinon.match.func);
+    it('should set default label to "$rx"', function() {
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      expect(ctrl.label).to.equal('$rx');
     });
 
-    it('should save the transclude scope', function() {
-      expect(ctrl.$transScope).to.equal(scope);
+    it('should get label from "rx-as" attribute', function() {
+      attrs.rxAs = 'foo';
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      expect(ctrl.label).to.equal('foo');
     });
 
-    it('should append the transclude clone to the element', function() {
-      expect(element.append).to.have.been.calledOnce;
-      expect(element.append).to.have.been.calledWithExactly(clone);
+    it('should watch for "rx-subscribe" attribute value', function() {
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      expect(scope.$watch).to.have.been.calledOnce;
+      expect(scope.$watch).to.have.been.calledWithExactly('$ctrl.src', sinon.match.func);
     });
 
-    it('should update the scope with the notifications', function() {
-      ctrl.src = Rx.Observable.of(1, 2).concat(Rx.Observable.never());
-      ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
+    it('should subscribe to the observable "rx-subscribe" reference', function() {
+      const src = new Rx.Subject();
 
-      expect(scope.$applyAsync).to.have.been.calledTwice;
-      expect(scope.$rx).to.eql({next: 2});
+      sinon.spy(src, 'subscribe');
+      scope.$watch.yields(src);
+
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      expect(src.subscribe).to.have.been.calledOnce;
+      expect(ctrl.subscription).to.equal(src.subscribe.lastCall.returnValue);
     });
 
-    it('should update the scope with the complete notifications', function() {
-      ctrl.src = Rx.Observable.of(1);
-      ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
+    it('should update the scope with next notification', function() {
+      const src = new Rx.Subject();
 
-      expect(scope.$applyAsync).to.have.been.calledTwice;
-      expect(scope.$rx).to.eql({next: 1, last: 1, complete: true});
+      sinon.spy(src, 'subscribe');
+      scope.$watch.yields(src);
+
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      src.next('foo');
+
+      expect(scope.$rx.next).to.equal('foo');
     });
 
-    it('should update the scope with the error notifications', function() {
-      const e = new Error();
+    it('should update the scope with complete notification', function() {
+      const src = new Rx.Subject();
 
-      ctrl.src = Rx.Observable.of(1).concat(Rx.Observable.throw(e));
-      ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
+      sinon.spy(src, 'subscribe');
+      scope.$watch.yields(src);
 
-      expect(scope.$applyAsync).to.have.been.calledTwice;
-      expect(scope.$rx).to.eql({last: 1, error: e});
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      src.next('foo');
+      src.complete();
+
+      expect(scope.$rx.next).to.equal('foo');
+      expect(scope.$rx.last).to.equal('foo');
+      expect(scope.$rx.complete).to.equal(true);
     });
 
-    it('should unsubscribe subscription on destroyed', function() {
-      ctrl.src = Rx.Observable.never();
-      sinon.spy(ctrl.src, 'subscribe');
-      ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
+    it('should update the scope with error notification', function() {
+      const src = new Rx.Subject();
+      const err = new Error();
 
-      expect(ctrl.src.subscribe).to.have.been.calledOnce;
+      sinon.spy(src, 'subscribe');
+      scope.$watch.yields(src);
 
-      const subscription = ctrl.src.subscribe.lastCall.returnValue;
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      src.next('foo');
+      src.error(err);
 
-      expect(ctrl.subscription).to.equal(subscription);
+      expect(scope.$rx.next).to.equal(undefined);
+      expect(scope.$rx.last).to.equal('foo');
+      expect(scope.$rx.error).to.equal(err);
+    });
+
+    it('should listen for scope destroy event', function() {
+      scope.$watch.yields(Rx.Observable.never());
+
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+
+      expect(scope.$on).to.have.been.calledOnce;
+      expect(scope.$on).to.have.been.calledWithExactly('$destroy', sinon.match.func);
+    });
+
+    it('should unsubscribe on destroy', function() {
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      scope.$watch.lastCall.args[1](Rx.Observable.never());
+
+      const subscription = ctrl.subscription;
       sinon.spy(subscription, 'unsubscribe');
 
-      ctrl.$onDestroy();
-      expect(subscription.unsubscribe).to.have.been.calledOnce;
+      scope.$on.lastCall.args[1]();
+      expect(subscription.unsubscribe).to.have.calledOnce;
     });
 
-    it('should destroy the transclude scope on destroyed', function() {
-      ctrl.src = Rx.Observable.never();
-      sinon.spy(ctrl.src, 'subscribe');
-      ctrl.$onChanges({src: {currentValue: ctrl.src, isFirstChange: () => true}});
+    it('should unsubscribe on source change', function() {
+      ctrl = new RxSubscribeCtrl(log, scope, attrs);
+      scope.$watch.lastCall.args[1](Rx.Observable.never());
 
-      ctrl.$onDestroy();
-      expect(scope.$destroy).to.have.been.calledOnce;
-    });
-
-    it('should unsubscribe subscription on destroyed', function() {
-      const firstSrc = ctrl.src = Rx.Observable.never();
-
-      sinon.spy(ctrl.src, 'subscribe');
-      ctrl.$onChanges({src: {currentValue: firstSrc, isFirstChange: () => true}});
-      expect(firstSrc.subscribe).to.have.been.calledOnce;
-
-      const subscription = firstSrc.subscribe.lastCall.returnValue;
-
+      const subscription = ctrl.subscription;
       sinon.spy(subscription, 'unsubscribe');
 
-      ctrl.src = Rx.Observable.never();
-      sinon.spy(ctrl.src, 'subscribe');
-      ctrl.$onChanges({src: {currentValue: ctrl.src, previousValue: firstSrc, isFirstChange: () => false}});
-
-      expect(subscription.unsubscribe).to.have.been.calledOnce;
-    });
-
-    it('should resubscribe subscription on destroyed', function() {
-      const firstSrc = ctrl.src = Rx.Observable.never();
-
-      sinon.spy(ctrl.src, 'subscribe');
-      ctrl.$onChanges({src: {currentValue: firstSrc, isFirstChange: () => true}});
-
-      ctrl.src = Rx.Observable.never();
-      sinon.spy(ctrl.src, 'subscribe');
-      ctrl.$onChanges({src: {currentValue: ctrl.src, previousValue: firstSrc, isFirstChange: () => false}});
-
-      expect(ctrl.src.subscribe).to.have.been.calledOnce;
+      scope.$watch.lastCall.args[1](Rx.Observable.never());
+      expect(subscription.unsubscribe).to.have.calledOnce;
     });
 
   });

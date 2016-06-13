@@ -18,41 +18,41 @@ app.component('app', {
 
     <h2>Basic</h2>
 
-    <rx-subscribe src="$ctrl.time">
-      <p>Time: {{$rx.next|date:'mediumTime'}}</p>
-    </rx-subscribe>
+    <p rx-subscribe="$ctrl.time">
+      Time: {{$rx.next|date:'mediumTime'}}
+    </p>
 
     <h2>Nested</h2>
 
     <p>
-      Using 'as="aLabel"' to nest "rx-subscribe" elements and differentiate
+      Using 'rx-as="aLabel"' to nest "rx-subscribe" elements and differentiate
       their notifications.
     </p>
 
-    <rx-subscribe src="$ctrl.time" as="now">
-      <rx-subscribe src="$ctrl.timeBefore" as="before">
+    <div rx-subscribe="$ctrl.time" rx-as="now">
+      <div rx-subscribe="$ctrl.timeBefore" rx-as="before">
         <p>It's a {{now.next|date:'mediumTime'}}</p>
         <p>5 seconds ago, it's a {{before.next|date:'mediumTime'}}</p>
-      </rx-subscribe>
-    </rx-subscribe>
+      </div>
+    </div>
 
     <h2>Complete</h2>
 
     <p>Complete doesn't reset the "next" property.</p>
 
-    <rx-subscribe src="$ctrl.timeLimited">
+    <div rx-subscribe="$ctrl.timeLimited">
       <p>Time: {{$rx.next|date:'mediumTime'}}</p>
       <p ng-if="$rx.complete">ummm... I am losing track of time.</p>
-    </rx-subscribe>
+    </div>
 
     <h2>Error</h2>
 
     <p>Error reset the "next" property.</p>
 
-    <rx-subscribe src="$ctrl.timeError">
+    <div rx-subscribe="$ctrl.timeError">
       <p>Time: {{$rx.next|date:'mediumTime'}}</p>
       <p ng-if="$rx.error">{{$rx.error.toString()}}</p>
-    </rx-subscribe>
+    </div>
 
     <h2>Unpacked</h2>
 

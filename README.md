@@ -66,10 +66,7 @@ const app = angular.module('exampleApp', ['rxSubscribe']);
 app.component('app', {
   template: `
     <h1>Example</h1>
-
-    <rx-subscribe src="$ctrl.time" as="$rx">
-      <p>Time: {{$rx.next|date:\'mediumTime\'}}</p>
-    </rx-subscribe>
+    <p rx-subscribe="$ctrl.time" rx-as="$rx">Time: {{$rx.next|date:\'mediumTime\'}}</p>
   `,
   controller: function AppController() {
     this.time = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
