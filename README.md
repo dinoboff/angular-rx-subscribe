@@ -1,6 +1,6 @@
 # angular-rx-subscribe
 
-AngularJS 1.5+ directive to access observable notifications.
+AngularJS directive to access observable notifications.
 
 
 ## Installation
@@ -53,7 +53,7 @@ the "as" attribute) will have a "next", "prev", "complete" and "error":
 
 - "next" holds the value of current "next" notification.
 - "last" holds the value of the previous "next" notication after a "complete"
-or and "error" notification.
+or "error" notification.
 - "complete" holds `true` if the Observable is completed (it doesn't reset
 "next").
 - "error" holds the error if the Observable throws an error (it does reset
@@ -66,7 +66,7 @@ const app = angular.module('exampleApp', ['rxSubscribe']);
 app.component('app', {
   template: `
     <h1>Example</h1>
-    <p rx-subscribe="$ctrl.time" rx-as="$rx">Time: {{$rx.next|date:\'mediumTime\'}}</p>
+    <p rx-subscribe="$ctrl.time" rx-as="$rx">Time: {{$rx.next|date:'mediumTime'}}</p>
   `,
   controller: function AppController() {
     this.time = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
