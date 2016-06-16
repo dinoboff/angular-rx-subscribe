@@ -32,7 +32,7 @@ app.run([
 app.component('app', {
   template: `
     <h1>Example</h1>
-    <p>Time: {{$ctrl.unpackedTime|date:\'mediumTime\'}}</p>
+    <p>Time: {{$ctrl.unpackedTime|date:'mediumTime'}}</p>
   `,
   controller: function AppController() {
     const src = Rx.Observable.interval(1000).startWith(0).map(() => new Date());
