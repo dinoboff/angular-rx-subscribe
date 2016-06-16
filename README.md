@@ -22,7 +22,7 @@ jspm install npm:angular-rx-subscribe
 
 Add a `$subscribe(observer, [scope])` to an Observable prototype:
 ```js
-const app = angular.module('exampleApp', []);
+const app = angular.module('exampleApp', ['rxSubscribe']);
 
 app.run([
   '$rootScope',
